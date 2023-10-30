@@ -56,13 +56,106 @@ Matriz leMatriz(FILE *arquivo) {
 }
 
 void imprimeMatriz(Matriz matriz) {
-    // Implemente a lógica de impressão da matriz, incluindo as células com valores diferentes de zero
+    for (int i = 0; i < matriz.nlin; i++) {
+        for (int j = 0; j < matriz.ncol; j++) {
+            Celula *atual = matriz.cabeca->direita;
+            int valor = 0;
+
+            while (atual != matriz.cabeca) {
+                if (atual->linha == i && atual->coluna == j) {
+                    valor = atual->valor;
+                    break;
+                }
+                atual = atual->direita;
+            }
+            
+            printf("%d ", valor);
+        }
+        printf("\n");
+    }
 }
+
 
 Matriz somaMatrizes(Matriz A, Matriz B) {
-    // Implemente a lógica de soma de matrizes, considerando que A e B têm as mesmas dimensões
+    if (A.nlin != B.nlin || A.ncol != B.ncol) {
+        printf("As matrizes têm dimensões diferentes, não podem ser somadas.\n");
+        exit(1);
+    }
+
+    Matriz resultado = inicializaMatriz(A.nlin, A.ncol);
+
+    for (int i = 0; i < A.nlin; i++) {
+        for (int j = 0; j < A.ncol; j++) {
+            Celula *atualA = A.cabeca->direita;
+            Celula *atualB = B.cabeca->direita;
+            float valorA = 0.0;
+            float valorB = 0.0;
+
+            while (atualA != A.cabeca) {
+                if (atualA->linha == i && atualA->coluna == j) {
+                    valorA = atualA->valor;
+                    break;
+                }
+                atualA = atualA->direita;
+            }
+
+            while (atualB != B.cabeca) {
+                if (atualB->linha == i && atualB->coluna == j) {
+                    valorB = atualB->valor;
+                    break;
+                }
+                atualB = atualB->direita;
+            }
+
+            insere(&resultado, i, j, valorA + valorB);
+        }
+    }
+
+    return resultado;
 }
 
+
 Matriz multiplicaMatrizes(Matriz A, Matriz B) {
-    // Implemente a lógica de multiplicação de matrizes, considerando as regras para multiplicação
+    if (A.ncol != B.nlin) {
+        printf("As matrizes não podem ser multiplicadas devido a dimensões inadequadas.\n");
+        exit(1);
+    }
+
+    Matriz resultado = inicializaMatriz(A.nlin, B.ncol);
+
+    for (int i = 0; i < A.nlin; i++) {
+        for (int j = 0; j < B.ncol; j++) {
+            float valor = 0.0;
+            for (int k = 0; k < A.ncol; k++) {
+                Celula *atualA = A.cabeca->direita;
+                Celula *atualB = B.cabeca->abaixo;
+
+                float valorA = 0.0;
+                float valorB = 0.0;
+
+                while (atualA != A.cabeca) {
+                    if (atualA->linha == i && atualA->coluna == k) {
+                        valorA = atualA->valor;
+                        break;
+                    }
+                    atualA = atualA->direita;
+                }
+
+                while (atualB != B.cabeca) {
+                    if (atualB->linha == k && atualB->coluna == j) {
+                        valorB = atualB->valor;
+                        break;
+                    }
+                    atualB = atualB->abaixo;
+                }
+
+                valor += valorA * valorB;
+            }
+
+            insere(&resultado, i, j, valor);
+        }
+    }
+
+    return resultado;
 }
+
