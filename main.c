@@ -28,7 +28,7 @@ int main(void) {
     printf("\nMatriz Resultante (Soma de A e B):\n");
     imprimeMatriz(C);
 
-    // Outros testes devem ser considerados aqui...
+    
 
     liberarMatriz(&A);
     liberarMatriz(&B);

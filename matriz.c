@@ -52,11 +52,11 @@ static void insere(Matriz *matriz, int linha, int coluna, float valor) {
     novaCelula->coluna = coluna;
     novaCelula->valor = valor;
 
-    // Insere na linha
+   
     novaCelula->direita = matriz->cabeca->direita;
     matriz->cabeca->direita = novaCelula;
 
-    // Insere na coluna
+  
     Celula *atual = matriz->cabeca;
     while (atual->abaixo != NULL) {
         atual = atual->abaixo;
@@ -66,13 +66,13 @@ static void insere(Matriz *matriz, int linha, int coluna, float valor) {
 }
 
 Matriz somaMatrizes(Matriz A, Matriz B) {
-    // Assume que as dimensões de A e B são iguais
+    
 
     Matriz C;
     C.nlin = A.nlin;
     C.ncol = A.ncol;
 
-    // Inicializa a matriz C com células cabeça
+   
     C.cabeca = (Celula *)malloc(sizeof(Celula));
     if (C.cabeca == NULL) {
         fprintf(stderr, "Erro ao alocar memória para a célula cabeça de C.\n");
@@ -85,12 +85,11 @@ Matriz somaMatrizes(Matriz A, Matriz B) {
 
     for (int i = 1; i <= C.nlin; i++) {
         for (int j = 1; j <= C.ncol; j++) {
-            // Inicializa os elementos de C como zero
+           
             insere(&C, i, j, 0.0);
         }
     }
 
-    // Itera sobre as células de A e B e soma os valores correspondentes em C
     for (int i = 1; i <= A.nlin; i++) {
         for (int j = 1; j <= A.ncol; j++) {
             float valorA = obtemValor(&A, i, j);
@@ -103,13 +102,13 @@ Matriz somaMatrizes(Matriz A, Matriz B) {
 }
 
 Matriz multiplicaMatrizes(Matriz A, Matriz B) {
-    // Assume que o número de colunas em A é igual ao número de linhas em B
+    
 
     Matriz C;
     C.nlin = A.nlin;
     C.ncol = B.ncol;
 
-    // Inicializa a matriz C com células cabeça
+    
     C.cabeca = (Celula *)malloc(sizeof(Celula));
     if (C.cabeca == NULL) {
         fprintf(stderr, "Erro ao alocar memória para a célula cabeça de C.\n");
@@ -122,12 +121,12 @@ Matriz multiplicaMatrizes(Matriz A, Matriz B) {
 
     for (int i = 1; i <= C.nlin; i++) {
         for (int j = 1; j <= C.ncol; j++) {
-            // Inicializa os elementos de C como zero
+            
             insere(&C, i, j, 0.0);
         }
     }
 
-    // Itera sobre as células de A e B e calcula os valores correspondentes em C
+    
     for (int i = 1; i <= A.nlin; i++) {
         for (int j = 1; j <= B.ncol; j++) {
             float soma = 0.0;
@@ -142,7 +141,7 @@ Matriz multiplicaMatrizes(Matriz A, Matriz B) {
 }
 
 void liberarMatriz(Matriz *matriz) {
-    // Libera a memória alocada para as células da matriz
+    
     Celula *atual, *proximo;
 
     for (int i = 1; i <= matriz->nlin; i++) {
