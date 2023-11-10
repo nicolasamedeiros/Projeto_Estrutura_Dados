@@ -1,31 +1,35 @@
+// main.c
 #include "matriz.h"
-#include <stdlib.h>
-#include <stdio.h>
 
-int main() {
+int main(void) {
     Matriz A, B, C;
-    A = leMatriz(stdin);  // Ler a matriz A a partir da entrada padrão (stdin neste caso)
-    B = leMatriz(stdin);  // Ler a matriz B a partir da entrada padrão
+    FILE *arquivoA = fopen("matrizA.txt", "r");
+    FILE *arquivoB = fopen("matrizB.txt", "r");
 
-    // Verificar se as matrizes têm as mesmas dimensões antes de somar
-    if (A.nlin != B.nlin || A.ncol != B.ncol) {
-        printf("As matrizes têm dimensões diferentes, não podem ser somadas.\n");
-        exit(1);
+    if (arquivoA == NULL || arquivoB == NULL) {
+        fprintf(stderr, "Erro ao abrir os arquivos de entrada.\n");
+        return 1;
     }
 
-    C = somaMatrizes(A, B);  // Somar as matrizes A e B
+    A = leMatriz(arquivoA);
+    fclose(arquivoA);
+
     printf("Matriz A:\n");
-    imprimeMatriz(A);  // Imprimir a matriz A
-    printf("Matriz B:\n");
-    imprimeMatriz(B);  // Imprimir a matriz B
-    printf("Matriz resultante C (A + B):\n");
-    imprimeMatriz(C);  // Imprimir a matriz resultante C
+    imprimeMatriz(A);
 
-    // Implemente outros testes e operações aqui, se desejar
+    B = leMatriz(arquivoB);
+    fclose(arquivoB);
 
-    // Lembre-se de liberar a memória alocada para as matrizes A, B e C, se necessário
-    // Libere a memória das células em cada matriz e, em seguida, libere a matriz.
-    // Exemplo de liberação de memória:
+    printf("\nMatriz B:\n");
+    imprimeMatriz(B);
+
+    C = somaMatrizes(A, B);
+
+    printf("\nMatriz Resultante (Soma de A e B):\n");
+    imprimeMatriz(C);
+
+    // Outros testes devem ser considerados aqui...
+
     liberarMatriz(&A);
     liberarMatriz(&B);
     liberarMatriz(&C);
