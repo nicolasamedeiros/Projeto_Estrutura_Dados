@@ -43,14 +43,21 @@ void imprimeMatriz(Matriz A) {
     for (int i = 1; i <= A.nlin; i++) {
         for (int j = 1; j <= A.ncol; j++) {
             Celula *atual = A.cabeca->direita;
-            while (atual != A.cabeca && atual->linha != i && atual->coluna != j) {
+            int encontrou = 0;
+
+            while (atual != A.cabeca) {
+                if (atual->linha == i && atual->coluna == j) {
+                    imprimeCelula(atual);
+                    encontrou = 1;
+                    break;
+                }
                 atual = atual->direita;
             }
 
-            if (atual != A.cabeca && atual->linha == i && atual->coluna == j) {
-                imprimeCelula(atual);
-            } else {
+            if (!encontrou) {
                 printf("(0, 0): 0.00\t");
+            } else {
+                encontrou = 0;
             }
         }
         printf("\n");
@@ -93,18 +100,21 @@ Matriz somaMatrizes(Matriz A, Matriz B) {
             Celula *celulaA = A.cabeca->direita;
             Celula *celulaB = B.cabeca->direita;
 
-            while (celulaA != A.cabeca && celulaA->coluna <= j) {
-                if (celulaA->linha == i) {
+            while (celulaA != A.cabeca || celulaB != B.cabeca) {
+                if (celulaA->linha == i && celulaA->coluna == j) {
                     soma += celulaA->valor;
-                }
-                celulaA = celulaA->direita;
-            }
-
-            while (celulaB != B.cabeca && celulaB->coluna <= j) {
-                if (celulaB->linha == i) {
+                    celulaA = celulaA->direita;
+                } else if (celulaB->linha == i && celulaB->coluna == j) {
                     soma += celulaB->valor;
+                    celulaB = celulaB->direita;
+                } else {
+                    if (celulaA->linha == i) {
+                        celulaA = celulaA->direita;
+                    }
+                    if (celulaB->linha == i) {
+                        celulaB = celulaB->direita;
+                    }
                 }
-                celulaB = celulaB->direita;
             }
 
             if (soma != 0.0) {
@@ -115,6 +125,7 @@ Matriz somaMatrizes(Matriz A, Matriz B) {
 
     return C;
 }
+
 
 Matriz multiplicaMatrizes(Matriz A, Matriz B) {
     if (A.ncol != B.nlin) {
