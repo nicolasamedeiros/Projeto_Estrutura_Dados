@@ -1,140 +1,115 @@
-// matriz.c
 #include "matriz.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-
-void imprimeMatriz(Matriz matriz) {
-    for (int i = 1; i <= matriz.nlin; i++) {
-        for (int j = 1; j <= matriz.ncol; j++) {
-            float valor = obtemValor(&matriz, i, j);
-            printf("%.2f\t", valor);
-        }
-        printf("\n");
-    }
-    }
-
-float obtemValor(Matriz *matriz, int linha, int coluna) {
-    Celula *atual = matriz->cabeca->direita;
-
-    while (atual != NULL) {
-        if (atual->linha == linha && atual->coluna == coluna) {
-            return atual->valor;
-        }
-        atual = atual->direita;
-    }
-
-    return 0.0;  // Valor padrão se a célula não for encontrada
-}
-
-
-Matriz leMatriz(FILE *arquivo) {
-    Matriz matriz;
-    int nlin, ncol;
-    fscanf(arquivo, "%d, %d", &nlin, &ncol);
-
-    matriz = inicializaMatriz(nlin, ncol);
-
-    int linha, coluna;
-    float valor;
-    while (fscanf(arquivo, "%d, %d, %f", &linha, &coluna, &valor) == 3) {
-        insere(&matriz, linha, coluna, valor);
-    }
-
-    return matriz;
-}
-Matriz inicializaMatriz(int nlin, int ncol) {
-    Matriz matriz;
-    matriz.nlin = nlin;
-    matriz.ncol = ncol;
-
-    matriz.cabeca = (Celula *)malloc(sizeof(Celula));
-    matriz.cabeca->linha = -1;
-    matriz.cabeca->coluna = -1;
-    matriz.cabeca->valor = 0;
-    matriz.cabeca->direita = matriz.cabeca;
-    matriz.cabeca->abaixo = matriz.cabeca;
-
-    for (int i = 0; i < nlin; i++) {
-        Celula *novaLinha = (Celula *)malloc(sizeof(Celula));
-        novaLinha->linha = i;
-        novaLinha->coluna = -1;
-        novaLinha->valor = 0;
-        novaLinha->direita = novaLinha;
-        novaLinha->abaixo = novaLinha;
-
-        novaLinha->direita = matriz.cabeca->direita;
-        matriz.cabeca->direita = novaLinha;
-
-        for (int j = 0; j < ncol; j++) {
-            Celula *novaColuna = (Celula *)malloc(sizeof(Celula));
-            novaColuna->linha = -1;
-            novaColuna->coluna = j;
-            novaColuna->valor = 0;
-            novaColuna->direita = novaColuna;
-            novaColuna->abaixo = novaColuna;
-
-            novaColuna->abaixo = matriz.cabeca->abaixo;
-            matriz.cabeca->abaixo = novaColuna;
-        }
-    }
-
-    return matriz;
-}
-
- void insere(Matriz *matriz, int linha, int coluna, float valor) {
+Celula *criaCelula(int linha, int coluna, float valor) {
     Celula *novaCelula = (Celula *)malloc(sizeof(Celula));
     if (novaCelula == NULL) {
-        fprintf(stderr, "Erro ao alocar memória para a célula.\n");
+        fprintf(stderr, "Erro de alocação de memória.\n");
         exit(EXIT_FAILURE);
     }
 
+    novaCelula->direita = novaCelula;
+    novaCelula->abaixo = novaCelula;
     novaCelula->linha = linha;
     novaCelula->coluna = coluna;
     novaCelula->valor = valor;
 
-   
-    novaCelula->direita = matriz->cabeca->direita;
-    matriz->cabeca->direita = novaCelula;
+    return novaCelula;
+}
 
-  
+void insereCelula(Matriz *matriz, Celula *celula) {
     Celula *atual = matriz->cabeca;
-    while (atual->abaixo != NULL) {
+    while (atual->abaixo != matriz->cabeca && atual->abaixo->linha < celula->linha) {
         atual = atual->abaixo;
     }
-    novaCelula->abaixo = atual->abaixo;
-    atual->abaixo = novaCelula;
+
+    while (atual->direita != matriz->cabeca && atual->direita->coluna < celula->coluna) {
+        atual = atual->direita;
+    }
+
+    celula->abaixo = atual->abaixo;
+    atual->abaixo = celula;
+
+    celula->direita = atual->direita;
+    atual->direita = celula;
+}
+
+void imprimeCelula(Celula *celula) {
+    printf("(%d, %d): %.2f\t", celula->linha, celula->coluna, celula->valor);
+}
+
+void imprimeMatriz(Matriz A) {
+    for (int i = 1; i <= A.nlin; i++) {
+        for (int j = 1; j <= A.ncol; j++) {
+            Celula *atual = A.cabeca->direita;
+            while (atual != A.cabeca && atual->linha != i && atual->coluna != j) {
+                atual = atual->direita;
+            }
+
+            if (atual != A.cabeca && atual->linha == i && atual->coluna == j) {
+                imprimeCelula(atual);
+            } else {
+                printf("(0, 0): 0.00\t");
+            }
+        }
+        printf("\n");
+    }
+}
+
+Matriz leMatriz(FILE *arquivo) {
+    Matriz matriz;
+    int m, n;
+    fscanf(arquivo, "%d, %d", &m, &n);
+
+    matriz.nlin = m;
+    matriz.ncol = n;
+    matriz.cabeca = criaCelula(-1, -1, 0.0);
+
+    int i, j;
+    float valor;
+    while (fscanf(arquivo, "%d, %d, %f", &i, &j, &valor) == 3) {
+        insereCelula(&matriz, criaCelula(i, j, valor));
+    }
+
+    return matriz;
 }
 
 Matriz somaMatrizes(Matriz A, Matriz B) {
-    
+    if (A.nlin != B.nlin || A.ncol != B.ncol) {
+        fprintf(stderr, "Erro: As matrizes têm dimensões diferentes.\n");
+        exit(EXIT_FAILURE);
+    }
 
     Matriz C;
     C.nlin = A.nlin;
     C.ncol = A.ncol;
-
-   
-    C.cabeca = (Celula *)malloc(sizeof(Celula));
-    if (C.cabeca == NULL) {
-        fprintf(stderr, "Erro ao alocar memória para a célula cabeça de C.\n");
-        exit(EXIT_FAILURE);
-    }
-    C.cabeca->linha = -1;
-    C.cabeca->coluna = -1;
-    C.cabeca->direita = NULL;
-    C.cabeca->abaixo = NULL;
-
-    for (int i = 1; i <= C.nlin; i++) {
-        for (int j = 1; j <= C.ncol; j++) {
-           
-            insere(&C, i, j, 0.0);
-        }
-    }
+    C.cabeca = criaCelula(-1, -1, 0.0);
 
     for (int i = 1; i <= A.nlin; i++) {
         for (int j = 1; j <= A.ncol; j++) {
-            float valorA = obtemValor(&A, i, j);
-            float valorB = obtemValor(&B, i, j);
-            insere(&C, i, j, valorA + valorB);
+            float soma = 0.0;
+
+            Celula *celulaA = A.cabeca->direita;
+            Celula *celulaB = B.cabeca->direita;
+
+            while (celulaA != A.cabeca && celulaA->coluna <= j) {
+                if (celulaA->linha == i) {
+                    soma += celulaA->valor;
+                }
+                celulaA = celulaA->direita;
+            }
+
+            while (celulaB != B.cabeca && celulaB->coluna <= j) {
+                if (celulaB->linha == i) {
+                    soma += celulaB->valor;
+                }
+                celulaB = celulaB->direita;
+            }
+
+            if (soma != 0.0) {
+                insereCelula(&C, criaCelula(i, j, soma));
+            }
         }
     }
 
@@ -142,61 +117,67 @@ Matriz somaMatrizes(Matriz A, Matriz B) {
 }
 
 Matriz multiplicaMatrizes(Matriz A, Matriz B) {
-    
+    if (A.ncol != B.nlin) {
+        fprintf(stderr, "Erro: Número de colunas de A não é igual ao número de linhas de B.\n");
+        exit(EXIT_FAILURE);
+    }
 
     Matriz C;
     C.nlin = A.nlin;
     C.ncol = B.ncol;
+    C.cabeca = criaCelula(-1, -1, 0.0);
 
-    
-    C.cabeca = (Celula *)malloc(sizeof(Celula));
-    if (C.cabeca == NULL) {
-        fprintf(stderr, "Erro ao alocar memória para a célula cabeça de C.\n");
-        exit(EXIT_FAILURE);
-    }
-    C.cabeca->linha = -1;
-    C.cabeca->coluna = -1;
-    C.cabeca->direita = NULL;
-    C.cabeca->abaixo = NULL;
-
-    for (int i = 1; i <= C.nlin; i++) {
-        for (int j = 1; j <= C.ncol; j++) {
-            
-            insere(&C, i, j, 0.0);
-        }
-    }
-
-    
     for (int i = 1; i <= A.nlin; i++) {
         for (int j = 1; j <= B.ncol; j++) {
-            float soma = 0.0;
+            float produto = 0.0;
+
             for (int k = 1; k <= A.ncol; k++) {
-                soma += obtemValor(&A, i, k) * obtemValor(&B, k, j);
+                Celula *celulaA = A.cabeca->direita;
+                Celula *celulaB = B.cabeca->direita;
+
+                while (celulaA != A.cabeca && celulaA->coluna <= k) {
+                    if (celulaA->linha == i) {
+                        while (celulaB != B.cabeca && celulaB->linha <= k) {
+                            if (celulaB->coluna == j) {
+                                produto += celulaA->valor * celulaB->valor;
+                            }
+                            celulaB = celulaB->abaixo;
+                        }
+                    }
+                    celulaA = celulaA->direita;
+                }
             }
-            insere(&C, i, j, soma);
+
+            if (produto != 0.0) {
+                insereCelula(&C, criaCelula(i, j, produto));
+            }
         }
     }
 
     return C;
 }
 
-void liberarMatriz(Matriz *matriz) {
-    
-    Celula *atual, *proximo;
+void insere(Matriz *matriz, int i, int j, float v) {
+    insereCelula(matriz, criaCelula(i, j, v));
+}
 
-    for (int i = 1; i <= matriz->nlin; i++) {
-        atual = matriz->cabeca->direita;
-        while (atual != NULL) {
-            proximo = atual->direita;
-            free(atual);
-            atual = proximo;
+void liberaMatriz(Matriz *matriz) {
+    Celula *atual = matriz->cabeca->abaixo;
+
+    while (atual != matriz->cabeca) {
+        Celula *proximaLinha = atual->abaixo;
+        Celula *celulaAtual = atual->direita;
+
+        while (celulaAtual != atual) {
+            Celula *proximaCelula = celulaAtual->direita;
+            free(celulaAtual);
+            celulaAtual = proximaCelula;
         }
 
-        proximo = matriz->cabeca->abaixo;
-        free(matriz->cabeca);
-        matriz->cabeca = proximo;
+        free(atual);
+        atual = proximaLinha;
     }
-    
 
-    
+    free(matriz->cabeca);
+    matriz->cabeca = NULL;
 }

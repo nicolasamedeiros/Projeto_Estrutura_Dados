@@ -1,7 +1,7 @@
 #ifndef MATRIZ_H
 #define MATRIZ_H
 
-#include <stdio.h>
+#include <stdio.h>  // Adiciona a inclusão da biblioteca stdio.h
 
 typedef struct Celula {
     struct Celula *direita, *abaixo;
@@ -14,13 +14,11 @@ typedef struct {
     int nlin, ncol;
 } Matriz;
 
-Matriz inicializaMatriz(int nlin, int ncol);
-void insere(Matriz *matriz, int linha, int coluna, float valor);
-void imprimeMatriz(Matriz matriz);
+void imprimeMatriz(Matriz A);
 Matriz leMatriz(FILE *arquivo);
-float obtemValor(Matriz *matriz, int linha, int coluna);  
 Matriz somaMatrizes(Matriz A, Matriz B);
 Matriz multiplicaMatrizes(Matriz A, Matriz B);
-void liberarMatriz(Matriz *matriz);
+void insere(Matriz *matriz, int i, int j, float v);
+void liberaMatriz(Matriz *matriz);
 
 #endif
