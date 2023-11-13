@@ -2,6 +2,46 @@
 #include "matriz.h"
 #include <stdlib.h>
 
+
+void imprimeMatriz(Matriz matriz) {
+    for (int i = 1; i <= matriz.nlin; i++) {
+        for (int j = 1; j <= matriz.ncol; j++) {
+            float valor = obtemValor(&matriz, i, j);
+            printf("%.2f\t", valor);
+        }
+        printf("\n");
+    }
+    }
+
+float obtemValor(Matriz *matriz, int linha, int coluna) {
+    Celula *atual = matriz->cabeca->direita;
+
+    while (atual != NULL) {
+        if (atual->linha == linha && atual->coluna == coluna) {
+            return atual->valor;
+        }
+        atual = atual->direita;
+    }
+
+    return 0.0;  // Valor padrão se a célula não for encontrada
+}
+
+
+Matriz leMatriz(FILE *arquivo) {
+    Matriz matriz;
+    int nlin, ncol;
+    fscanf(arquivo, "%d, %d", &nlin, &ncol);
+
+    matriz = inicializaMatriz(nlin, ncol);
+
+    int linha, coluna;
+    float valor;
+    while (fscanf(arquivo, "%d, %d, %f", &linha, &coluna, &valor) == 3) {
+        insere(&matriz, linha, coluna, valor);
+    }
+
+    return matriz;
+}
 Matriz inicializaMatriz(int nlin, int ncol) {
     Matriz matriz;
     matriz.nlin = nlin;
@@ -41,7 +81,7 @@ Matriz inicializaMatriz(int nlin, int ncol) {
     return matriz;
 }
 
-static void insere(Matriz *matriz, int linha, int coluna, float valor) {
+ void insere(Matriz *matriz, int linha, int coluna, float valor) {
     Celula *novaCelula = (Celula *)malloc(sizeof(Celula));
     if (novaCelula == NULL) {
         fprintf(stderr, "Erro ao alocar memória para a célula.\n");
@@ -156,4 +196,7 @@ void liberarMatriz(Matriz *matriz) {
         free(matriz->cabeca);
         matriz->cabeca = proximo;
     }
+    
+
+    
 }

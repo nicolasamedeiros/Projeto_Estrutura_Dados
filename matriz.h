@@ -1,4 +1,3 @@
-// matriz.h
 #ifndef MATRIZ_H
 #define MATRIZ_H
 
@@ -19,6 +18,7 @@ Matriz inicializaMatriz(int nlin, int ncol);
 void insere(Matriz *matriz, int linha, int coluna, float valor);
 void imprimeMatriz(Matriz matriz);
 Matriz leMatriz(FILE *arquivo);
+float obtemValor(Matriz *matriz, int linha, int coluna);  
 Matriz somaMatrizes(Matriz A, Matriz B);
 Matriz multiplicaMatrizes(Matriz A, Matriz B);
 void liberarMatriz(Matriz *matriz);
