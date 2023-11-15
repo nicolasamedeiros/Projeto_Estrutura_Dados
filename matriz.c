@@ -1,124 +1,88 @@
-#include "matriz.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "matriz.h"
 
-Celula *criaCelula(int linha, int coluna, float valor) {
-    Celula *novaCelula = (Celula *)malloc(sizeof(Celula));
-    if (novaCelula == NULL) {
-        fprintf(stderr, "Erro de alocação de memória.\n");
-        exit(EXIT_FAILURE);
+Matriz leMatriz(char* arquivo) {
+    Matriz A;
+    FILE* file = fopen(arquivo, "r");
+
+    if (file == NULL) {
+        perror("Erro ao abrir o arquivo");
+        
     }
 
-    novaCelula->direita = novaCelula;
-    novaCelula->abaixo = novaCelula;
-    novaCelula->linha = linha;
-    novaCelula->coluna = coluna;
-    novaCelula->valor = valor;
+    fscanf(file, "%d %d", &A.l, &A.c);
+    A.cabeca = NULL;
 
-    return novaCelula;
-}
-
-void insereCelula(Matriz *matriz, Celula *celula) {
-    Celula *atual = matriz->cabeca;
-    while (atual->abaixo != matriz->cabeca && atual->abaixo->linha < celula->linha) {
-        atual = atual->abaixo;
+    int i, j;
+    double valor;
+    while (fscanf(file, "%d %d %lf", &i, &j, &valor) == 3) {
+        No* novo = (No*)malloc(sizeof(No));
+        novo->i = i;
+        novo->j = j;
+        novo->valor = valor;
+        novo->prox = A.cabeca;
+        A.cabeca = novo;
     }
 
-    while (atual->direita != matriz->cabeca && atual->direita->coluna < celula->coluna) {
-        atual = atual->direita;
-    }
-
-    celula->abaixo = atual->abaixo;
-    atual->abaixo = celula;
-
-    celula->direita = atual->direita;
-    atual->direita = celula;
-}
-
-void imprimeCelula(Celula *celula) {
-    printf("(%d, %d): %.2f\t", celula->linha, celula->coluna, celula->valor);
+    fclose(file);
+    return A;
 }
 
 void imprimeMatriz(Matriz A) {
-    for (int i = 1; i <= A.nlin; i++) {
-        for (int j = 1; j <= A.ncol; j++) {
-            Celula *atual = A.cabeca->direita;
-            int encontrou = 0;
-
-            while (atual != A.cabeca) {
-                if (atual->linha == i && atual->coluna == j) {
-                    imprimeCelula(atual);
-                    encontrou = 1;
+    for (int i = 0; i < A.l; i++) {
+        for (int j = 0; j < A.c; j++) {
+            No* atual = A.cabeca;
+            while (atual != NULL) {
+                if (atual->i == i && atual->j == j) {
+                    printf("%.2f\t", atual->valor);
                     break;
                 }
-                atual = atual->direita;
+                atual = atual->prox;
             }
-
-            if (!encontrou) {
-                printf("(0, 0): 0.00\t");
-            } else {
-                encontrou = 0;
+            if (atual == NULL) {
+                printf("0.00\t");
             }
         }
         printf("\n");
     }
 }
 
-Matriz leMatriz(FILE *arquivo) {
-    Matriz matriz;
-    int m, n;
-    fscanf(arquivo, "%d, %d", &m, &n);
-
-    matriz.nlin = m;
-    matriz.ncol = n;
-    matriz.cabeca = criaCelula(-1, -1, 0.0);
-
-    int i, j;
-    float valor;
-    while (fscanf(arquivo, "%d, %d, %f", &i, &j, &valor) == 3) {
-        insereCelula(&matriz, criaCelula(i, j, valor));
-    }
-
-    return matriz;
-}
-
 Matriz somaMatrizes(Matriz A, Matriz B) {
-    if (A.nlin != B.nlin || A.ncol != B.ncol) {
-        fprintf(stderr, "Erro: As matrizes têm dimensões diferentes.\n");
-        exit(EXIT_FAILURE);
-    }
-
     Matriz C;
-    C.nlin = A.nlin;
-    C.ncol = A.ncol;
-    C.cabeca = criaCelula(-1, -1, 0.0);
+    C.l = A.l;
+    C.c = A.c;
+    C.cabeca = NULL;
 
-    for (int i = 1; i <= A.nlin; i++) {
-        for (int j = 1; j <= A.ncol; j++) {
-            float soma = 0.0;
+    for (int i = 0; i < C.l; i++) {
+        for (int j = 0; j < C.c; j++) {
+            No* atualA = A.cabeca;
+            No* atualB = B.cabeca;
+            double soma = 0.0;
 
-            Celula *celulaA = A.cabeca->direita;
-            Celula *celulaB = B.cabeca->direita;
-
-            while (celulaA != A.cabeca || celulaB != B.cabeca) {
-                if (celulaA->linha == i && celulaA->coluna == j) {
-                    soma += celulaA->valor;
-                    celulaA = celulaA->direita;
-                } else if (celulaB->linha == i && celulaB->coluna == j) {
-                    soma += celulaB->valor;
-                    celulaB = celulaB->direita;
-                } else {
-                    if (celulaA->linha == i) {
-                        celulaA = celulaA->direita;
-                    }
-                    if (celulaB->linha == i) {
-                        celulaB = celulaB->direita;
-                    }
+            while (atualA != NULL) {
+                if (atualA->i == i && atualA->j == j) {
+                    soma += atualA->valor;
+                    break;
                 }
+                atualA = atualA->prox;
+            }
+
+            while (atualB != NULL) {
+                if (atualB->i == i && atualB->j == j) {
+                    soma += atualB->valor;
+                    break;
+                }
+                atualB = atualB->prox;
             }
 
             if (soma != 0.0) {
-                insereCelula(&C, criaCelula(i, j, soma));
+                No* novo = (No*)malloc(sizeof(No));
+                novo->i = i;
+                novo->j = j;
+                novo->valor = soma;
+                novo->prox = C.cabeca;
+                C.cabeca = novo;
             }
         }
     }
@@ -126,69 +90,23 @@ Matriz somaMatrizes(Matriz A, Matriz B) {
     return C;
 }
 
+void liberaMatriz(Matriz* matriz) {
+    No* atual = matriz->cabeca;
+    No* proximo;
 
-Matriz multiplicaMatrizes(Matriz A, Matriz B) {
-    if (A.ncol != B.nlin) {
-        fprintf(stderr, "Erro: Número de colunas de A não é igual ao número de linhas de B.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    Matriz C;
-    C.nlin = A.nlin;
-    C.ncol = B.ncol;
-    C.cabeca = criaCelula(-1, -1, 0.0);
-
-    for (int i = 1; i <= A.nlin; i++) {
-        for (int j = 1; j <= B.ncol; j++) {
-            float produto = 0.0;
-
-            for (int k = 1; k <= A.ncol; k++) {
-                Celula *celulaA = A.cabeca->direita;
-                Celula *celulaB = B.cabeca->direita;
-
-                while (celulaA != A.cabeca && celulaA->coluna <= k) {
-                    if (celulaA->linha == i) {
-                        while (celulaB != B.cabeca && celulaB->linha <= k) {
-                            if (celulaB->coluna == j) {
-                                produto += celulaA->valor * celulaB->valor;
-                            }
-                            celulaB = celulaB->abaixo;
-                        }
-                    }
-                    celulaA = celulaA->direita;
-                }
-            }
-
-            if (produto != 0.0) {
-                insereCelula(&C, criaCelula(i, j, produto));
-            }
-        }
-    }
-
-    return C;
-}
-
-void insere(Matriz *matriz, int i, int j, float v) {
-    insereCelula(matriz, criaCelula(i, j, v));
-}
-
-void liberaMatriz(Matriz *matriz) {
-    Celula *atual = matriz->cabeca->abaixo;
-
-    while (atual != matriz->cabeca) {
-        Celula *proximaLinha = atual->abaixo;
-        Celula *celulaAtual = atual->direita;
-
-        while (celulaAtual != atual) {
-            Celula *proximaCelula = celulaAtual->direita;
-            free(celulaAtual);
-            celulaAtual = proximaCelula;
-        }
-
+    while (atual != NULL) {
+        proximo = atual->prox;
         free(atual);
-        atual = proximaLinha;
+        atual = proximo;
     }
 
-    free(matriz->cabeca);
     matriz->cabeca = NULL;
+}
+
+void imprimeSomaMatrizes(Matriz A, Matriz B) {
+    Matriz C = somaMatrizes(A, B);
+
+    printf("\nSoma das matrizes A e B:\n");
+    imprimeMatriz(C);
+    liberaMatriz(&C);
 }

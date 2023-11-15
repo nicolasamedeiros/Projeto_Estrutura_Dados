@@ -1,41 +1,20 @@
-#include "matriz.h"
 #include <stdio.h>
+#include "matriz.h"
 
-int main(void) {
-    Matriz A, B, C;
-    FILE *arquivoA, *arquivoB;
+int main() {
+    Matriz A = leMatriz("matrizA.txt");
+    Matriz B = leMatriz("matrizB.txt");
 
-    
-    arquivoA = fopen("matrizA.txt", "r");
-    arquivoB = fopen("matrizB.txt", "r");
-
-    if (arquivoA == NULL || arquivoB == NULL) {
-        fprintf(stderr, "Erro ao abrir os arquivos de entrada.\n");
-        return 1;
-    }
-
-    
-    A = leMatriz(arquivoA);
-    B = leMatriz(arquivoB);
-
-    
     printf("Matriz A:\n");
     imprimeMatriz(A);
 
     printf("\nMatriz B:\n");
     imprimeMatriz(B);
 
-    
-    C = somaMatrizes(A, B);
-    printf("\nSoma das matrizes A e B:\n");
-    imprimeMatriz(C);
+    imprimeSomaMatrizes(A, B);
 
-    
-    fclose(arquivoA);
-    fclose(arquivoB);
     liberaMatriz(&A);
     liberaMatriz(&B);
-    liberaMatriz(&C);
 
     return 0;
 }

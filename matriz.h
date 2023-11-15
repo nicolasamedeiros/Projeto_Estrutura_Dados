@@ -1,24 +1,21 @@
-#ifndef MATRIZ_H
-#define MATRIZ_H
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <stdio.h>  // Adiciona a inclusão da biblioteca stdio.h
-
-typedef struct Celula {
-    struct Celula *direita, *abaixo;
-    int linha, coluna;
-    float valor;
-} Celula;
+typedef struct No {
+    int i, j;
+    double valor;
+    struct No* prox;
+} No;
 
 typedef struct {
-    Celula *cabeca;
-    int nlin, ncol;
+    int l, c;
+    No* cabeca;
 } Matriz;
 
+Matriz leMatriz(char* arquivo);
 void imprimeMatriz(Matriz A);
-Matriz leMatriz(FILE *arquivo);
 Matriz somaMatrizes(Matriz A, Matriz B);
-Matriz multiplicaMatrizes(Matriz A, Matriz B);
-void insere(Matriz *matriz, int i, int j, float v);
-void liberaMatriz(Matriz *matriz);
+void liberaMatriz(Matriz* matriz);
+void imprimeSomaMatrizes(Matriz A, Matriz B);
 
-#endif
+
